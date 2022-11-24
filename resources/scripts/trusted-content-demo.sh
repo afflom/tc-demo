@@ -27,7 +27,7 @@
 # DEMO_CMD_COLOR=$BLACK
 
 # hide the evidence
-clear
+#clear
 
 # Intro
 
@@ -39,19 +39,19 @@ function demoIntro(){
   p "1. Build an Emporous Collection from an application"
   p "2. Publish application"
   p "3. Discover applications with Emporous"
-  p "3. Pull and run Emporous content"
-  p "4. Publish a CVE for previously published content"
-  p "5. Discover the CVE \n"
-  p "6. Publish an updated Emporous Collection"
-  p "7. Discover, update, and run the updated content"
+  p "4. Pull and run Emporous content"
+  p "5. Publish a CVE for previously published content"
+  p "6. Discover the CVE"
+  p "7. Publish an updated Emporous Collection"
+  p "8. Discover, update, and run the updated content"
   p "Let's get started!\n"
   clear
 }
 # Build app v1 Collection
 
 function buildV1(){
+  DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "1. Build an Emporous Collection from an appliation\n"
   p "Author dataset-config.yaml:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
@@ -66,12 +66,9 @@ function buildV1(){
   wait
 }
 
-# Publish app v1
+# Publish app
 
 function publishApp(){
-  DEMO_PROMPT=""
-  PROMPT_TIMEOUT=3
-  p "2. Publish application:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
   pei "uor-client-go push next.registry.io/myorg/myapp"
@@ -81,7 +78,13 @@ function publishApp(){
 
 # Verify app CVEs prior to running
 function checkCVE(){
-
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "Poll the Emporous endpoint for vulnerability updates:\n"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go pull --attributes=../configs/cve-attribute-query.yaml"
+  wait
 }
 
 
@@ -99,8 +102,8 @@ function pullAndRun(){
 
 function buildAndPushCVE(){
   # Build CVE Collection
+  DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "1. Build an Emporous Collection from a CVE\n"
   p "Author dataset-config.yaml:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
@@ -118,30 +121,30 @@ function buildAndPushCVE(){
   PROMPT_TIMEOUT=3
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "2. Publish application:\n"
+  p "Publish CVE:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go push next.registry.io/myorg/myapp"
+  pei "uor-client-go push next.registry.io/myorg/cves"
   wait
 
 }
 
 
 # Build app v2 Collection
-function buildV1(){
+function buildV2(){
+  DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "1. Build an Emporous Collection from an appliation\n"
   p "Author dataset-config.yaml:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "cat ../configs/app-dataset-config.yaml"
+  pei "cat ../configs/app-v2-dataset-config.yaml"
   wait
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "Add metadata to application:\n"
+  p "Add metadata to the updated application:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go build collection -d ../configs/app-dataset-config.yaml ./app/v1 next.registry.io/myorg/myapp"
+  pei "uor-client-go build collection -d ../configs/app-v2-dataset-config.yaml ../content/app/v2 next.registry.io/myorg/myapp"
   wait
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
@@ -150,7 +153,13 @@ function buildV1(){
 
 ## Discover app update to v2
 function discoverApps(){
-
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "Poll the Emporous endpoint for application updates:\n"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go pull --attributes=../configs/app-attribute-query.yaml /dev/null --no-verify=true"
+  wait
 }
 
 
@@ -164,22 +173,61 @@ function endDemo(){
   p ""
 }
 
+
+
+
+
+
+export PATH=$PATH:$PWD/distribution/bin:$PWD/client/bin:$PWD/runc-attributes-wrapper/bin
+
+# Start the registry 
+registry serve cmd/registry/config-dev.yml &>/dev/null
+
+# Intro
+demoIntro
 # "1. Build an Emporous Collection from an application"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "1. Build an Emporous Collection from an updated appliation\n"
 buildV1
 # "2. Publish application"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "2. Publish application:\n"
 publishApp
 # "3. Discover applications with Emporous"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "3. Discover applications with Emporous:\n"
 discoverApps
-# "3. Pull and run Emporous content"
+# "4. Pull and run Emporous content"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "4. Pull and run Emporous content:\n"
 pullAndRun
-# "4. Publish a CVE for previously published content"
+# "5. Publish a CVE for previously published content"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "5. Publish a CVE for previously published content:\n"
 buildAndPushCVE
-# "5. Discover the CVE \n"
-discoverCVE
-# "6. Publish an updated Emporous Collection"
+# "6. Discover the CVE \n"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "6. Discover the CVE:\n"
+checkCVE
+# "7. Publish an updated Emporous Collection"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "6. Build an Emporous Collection from an updated appliation\n"
 buildV2
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "7. Publish application:\n"
 publishApp
-# "7. Discover, update, and run the updated content"
+# "8. Discover, update, and run the updated content"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "7. Discover, pull, and run updated application:\n"
 discoverApps
 pullAndRun
 # End

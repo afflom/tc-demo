@@ -6,8 +6,13 @@ RUN dnf install -y \
     pv \
     asciinema \
     make \
+    runc \
     jq
 
 COPY . .
 
-ENTRYPOINT [ "./resources/scripts/launch-recording.sh" ]
+WORKDIR /resources/scripts/
+
+RUN "./build-environment.sh"
+
+ENTRYPOINT [ "./launch-recording.sh" ]
