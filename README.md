@@ -17,4 +17,10 @@ This demo shows the following workflow
 13. Run update
 14. Continue polling for app and CVE updates
 
-Run the dam
+
+
+Build the demo:
+docker build . -t tc-demo
+
+Run the demo:
+docker run -it  --privileged  tc-demo
