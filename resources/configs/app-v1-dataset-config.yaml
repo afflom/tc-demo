@@ -1,0 +1,7 @@
+kind: DataSetConfiguration
+apiVersion: client.uor-framework.io/v1alpha1
+collection:
+  components:
+    language: "EN"
+    name: "myapp"
+    version: "1.0.0"

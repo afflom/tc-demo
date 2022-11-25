@@ -62,16 +62,11 @@ function buildV1(){
   p "Add metadata to application:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go build collection -d ../configs/app-v1-dataset-config.yaml ../content/app/v1 next.registry.io/myorg/myapp"
+  pei "uor-client-go build collection -d ../configs/app-v1-dataset-config.yaml ../content/app/v1 next.registry.io:5001/myorg/myapp:1.0.0 --no-verify=true --plain-http=true"
   wait
-}
-
-# Publish app
-
-function publishApp(){
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go push next.registry.io/myorg/myapp"
+  pei "uor-client-go push next.registry.io:5001/myorg/myapp:1.0.0 --plain-http=true"
   wait
 }
 
@@ -83,7 +78,7 @@ function checkCVE(){
   p "Poll the Emporous endpoint for vulnerability updates:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go pull --attributes=../configs/cve-attribute-query.yaml"
+  pei "uor-client-go create aggregate --schema-id=cve next.registry.io:5001 ../configs/cve-attribute-query.yaml --plain-http=true"
   wait
 }
 
@@ -96,7 +91,7 @@ function pullAndRun(){
   p "Pull and run application using the Emporous runtime client:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "rcl run --fetch=true next.registry.io/myorg/myapp"
+  pei "rcl run --fetch=true next.registry.io:5001/myorg/myapp"
   wait
 }
 
@@ -115,18 +110,20 @@ function buildAndPushCVE(){
   p "Add metadata to CVE:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go build collection -d ../configs/cve-dataset-config.yaml ../content/cve next.registry.io/myorg/cves"
+  pei "uor-client-go build collection -d ../configs/cve-dataset-config.yaml ../content/cve next.registry.io:5001/myorg/cves:myapp-v1.0.0 --no-verify=true --plain-http=true"
   wait
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
-  p "Publish CVE:\n"
+  p "Publish CVE with link:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go push next.registry.io/myorg/cves"
+  pei "uor-client-go push --plain-http=true next.registry.io:5001/myorg/cves:myapp-v1.0.0"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go push --plain-http=true next.registry.io:5001/myorg/cves:myapp-v1.0.0-aggregate"
   wait
-
 }
 
 
@@ -144,10 +141,12 @@ function buildV2(){
   p "Add metadata to the updated application:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go build collection -d ../configs/app-v2-dataset-config.yaml ../content/app/v2 next.registry.io/myorg/myapp"
+  pei "uor-client-go build collection -d ../configs/app-v2-dataset-config.yaml ../content/app/v2 next.registry.io:5001/myorg/myapp:1.0.1 --no-verify=true --plain-http=true"
   wait
-  DEMO_PROMPT=""
-  PROMPT_TIMEOUT=3
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go push next.registry.io:5001/myorg/myapp:1.0.1 --plain-http=true"
+  wait
 }
 
 
@@ -158,7 +157,7 @@ function discoverApps(){
   p "Poll the Emporous endpoint for application updates:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go pull --attributes=../configs/app-attribute-query.yaml /dev/null --no-verify=true"
+  pei "uor-client-go create aggregate --schema-id=core-descriptor next.registry.io:5001 ../configs/app-attribute-query.yaml --plain-http=true"
   wait
 }
 
@@ -181,7 +180,24 @@ function endDemo(){
 export PATH=$PATH:$PWD/distribution/bin:$PWD/client/bin:$PWD/runc-attributes-wrapper/bin
 
 # Start the registry 
-registry serve cmd/registry/config-dev.yml &>/dev/null
+
+
+# TODO: redirect output to /dev/null so that the registry doesnt clutter the demo
+ registry serve ./distribution/cmd/registry/config-dev.yml &
+echo '127.0.0.1 next.registry.io' >> /etc/hosts
+
+
+if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest
+then
+  echo "failed to build cve schema"
+  exit 1
+fi
+
+if ! uor-client-go push --plain-http next.registry.io:5001/myorg/cves/schema:latest
+then
+  echo "failed to push cve schema"
+  exit 1
+fi
 
 # Intro
 demoIntro
@@ -190,11 +206,6 @@ DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
 p "1. Build an Emporous Collection from an updated appliation\n"
 buildV1
-# "2. Publish application"
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "2. Publish application:\n"
-publishApp
 # "3. Discover applications with Emporous"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
@@ -220,10 +231,6 @@ DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
 p "6. Build an Emporous Collection from an updated appliation\n"
 buildV2
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "7. Publish application:\n"
-publishApp
 # "8. Discover, update, and run the updated content"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
