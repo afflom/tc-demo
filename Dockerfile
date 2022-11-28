@@ -7,6 +7,7 @@ RUN dnf install -y \
     asciinema \
     make \
     runc \
+    containerd \
     jq
 
 COPY . .
