@@ -1,7 +1,15 @@
 kind: DataSetConfiguration
 apiVersion: client.uor-framework.io/v1alpha1
 collection:
+  runtime:
+    Cmd:
+      - "./helloworld"
   components:
     language: "EN"
     name: "myapp"
     version: "1.0.0"
+  files:
+    - file: "helloworld"
+      fileInfo:
+        permissions: 0700
+

@@ -77,6 +77,10 @@ function checkCVE(){
   PROMPT_TIMEOUT=3
   p "Poll the Emporous endpoint for vulnerability updates:\n"
   DEMO_PROMPT="$ "
+    PROMPT_TIMEOUT=2
+    pei "cat ../configs/cve-attribute-query.yaml"
+    wait
+  DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
   pei "uor-client-go create aggregate --schema-id=cve next.registry.io:5001 ../configs/cve-attribute-query.yaml --plain-http=true"
   wait
@@ -86,12 +90,13 @@ function checkCVE(){
 # Pull and run Emporous content
 
 function pullAndRun(){
+  local TAG="${1:?TAG required}"
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=3
   p "Pull and run application using the Emporous runtime client:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "rcl run --fetch=true next.registry.io:5001/myorg/myapp"
+  pei "rcl run --fetch=true --plain-http=true next.registry.io:5001/myorg/myapp:$TAG mycontainer"
   wait
 }
 
@@ -122,7 +127,6 @@ function buildAndPushCVE(){
   pei "uor-client-go push --plain-http=true next.registry.io:5001/myorg/cves:myapp-v1.0.0"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go push --plain-http=true next.registry.io:5001/myorg/cves:myapp-v1.0.0-aggregate"
   wait
 }
 
@@ -157,6 +161,10 @@ function discoverApps(){
   p "Poll the Emporous endpoint for application updates:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
+  pei "cat ../configs/app-attribute-query.yaml"
+  wait
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
   pei "uor-client-go create aggregate --schema-id=core-descriptor next.registry.io:5001 ../configs/app-attribute-query.yaml --plain-http=true"
   wait
 }
@@ -182,10 +190,11 @@ export PATH=$PATH:$PWD/distribution/bin:$PWD/client/bin:$PWD/runc-attributes-wra
 # Start the registry 
 
 
-# TODO: redirect output to /dev/null so that the registry doesnt clutter the demo
- registry serve ./distribution/cmd/registry/config-dev.yml &
+ registry serve ./distribution/cmd/registry/config-dev.yml > registry.log 2>&1 &
 echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
+# Start containerd
+containerd > containerd.log 2>&1 &
 
 if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest
 then
@@ -204,7 +213,7 @@ demoIntro
 # "1. Build an Emporous Collection from an application"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "1. Build an Emporous Collection from an updated appliation\n"
+p "1. Build an Emporous Collection from an updated application\n"
 buildV1
 # "3. Discover applications with Emporous"
 DEMO_PROMPT=""
@@ -215,7 +224,7 @@ discoverApps
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
 p "4. Pull and run Emporous content:\n"
-pullAndRun
+pullAndRun "1.0.0"
 # "5. Publish a CVE for previously published content"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
@@ -229,14 +238,14 @@ checkCVE
 # "7. Publish an updated Emporous Collection"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "6. Build an Emporous Collection from an updated appliation\n"
+p "6. Build an Emporous Collection from an updated application\n"
 buildV2
 # "8. Discover, update, and run the updated content"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
 p "7. Discover, pull, and run updated application:\n"
 discoverApps
-pullAndRun
+pullAndRun "1.0.1"
 # End
 endDemo
 
