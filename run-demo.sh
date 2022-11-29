@@ -1,4 +1,5 @@
 #!/bin/bash
 
-# This demo uses containerd and runc, so the --priviliged flag is used. 
-docker run --rm -it  --privileged  tc-demo
+run_cmd=$(command -pv podman || command -pv docker)
+# This demo uses containerd and runc, so the --privileged flag is used.
+${run_cmd} run -it  --privileged tc-demo

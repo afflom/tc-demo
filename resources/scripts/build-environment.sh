@@ -99,7 +99,7 @@ echo '127.0.0.1 next.registry.io' >> /etc/hosts
 echo "starting demo app v1 build"
 ## build demo app v1
 cd ../content/app/v1
-if ! go build 
+if ! go build -o helloworld
 then
   echo "appv1 not built"
   exit 1
@@ -109,7 +109,7 @@ cd -
 echo "starting demo app v2 build"
 
 cd ../content/app/v2
-if ! go build
+if ! go build -o helloworld
 then
   echo "appv2 not built"
   exit 1
