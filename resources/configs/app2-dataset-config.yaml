@@ -2,10 +2,5 @@ kind: DataSetConfiguration
 apiVersion: client.uor-framework.io/v1alpha1
 collection:
   linkedCollections: 
-    - next.registry.io:5001/myorg/myapp@sha256:da7373636f7eecf9d609a55a50cbbf534f24d8c7372f563abfdb04f1e1946ea4
-
-  components:
-    language: "EN"
-    name: "app2"
-    version: "1.0.0"
+    - next.registry.io:5001/myorg/myapp@sha256:87027a33088be35a06c91676ca0a3eb044617090ca861744229358affe8f9725
 

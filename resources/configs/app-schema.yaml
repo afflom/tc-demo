@@ -1,0 +1,10 @@
+kind: SchemaConfiguration
+apiVersion: client.uor-framework.io/v1alpha1
+schema:
+  id: "application"
+  attributeTypes:
+    "name": "string"
+    "majorVersion": "integer"
+    "minorVersion": "integer"
+    "patchVersion": "integer"
+

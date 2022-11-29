@@ -1,14 +1,16 @@
 kind: DataSetConfiguration
 apiVersion: client.uor-framework.io/v1alpha1
 collection:
+  schemaAddress: next.registry.io:5001/myorg/application/schema:latest
   runtime:
     Cmd:
       - "./helloworld"
-  components:
-    language: "EN"
-    name: "myapp"
-    version: "1.0.1"
   files:
     - file: "helloworld"
       fileInfo:
         permissions: 0700
+      attributes:
+        name: myapp
+        majorVersion: 1
+        minorVersion: 0
+        patchVersion: 1
