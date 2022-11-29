@@ -96,7 +96,7 @@ function pullAndRun(){
   p "Pull and run application using the Emporous runtime client:\n"
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "rcl run --fetch=true --plain-http=true next.registry.io:5001/myorg/myapp:$TAG mycontainer"
+  pei "rcl run --fetch=true --plain-http=true next.registry.io:5001/myorg/myapp:$TAG mycontainer$TAG"
   wait
 }
 
@@ -213,14 +213,19 @@ function endDemo(){
 
 export PATH=$PATH:$PWD/demo-bin
 
-# Start the registry 
-
+# Start the registry
 
  registry serve ./config-dev.yml > registry.log 2>&1 &
 #echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
+# Install containerd and runc
+wget https://github.com/containerd/containerd/releases/download/v1.6.10/containerd-1.6.10-linux-amd64.tar.gz
+tar xvf containerd-1.6.10-linux-amd64.tar.gz
+
+dnf -y install runc
+
 # Start containerd
-containerd > containerd.log 2>&1 &
+./bin/containerd > containerd.log 2>&1 &
 
 if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest
 then
