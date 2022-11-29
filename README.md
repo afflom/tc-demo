@@ -16,11 +16,12 @@ This demo shows the following workflow
 12. Delete running hello world app
 13. Run update
 14. Continue polling for app and CVE updates
+15. Build a software inventory (sbom) from an application dependency tree. 
 
 
 
 Build the demo:
-docker build . -t tc-demo
+./build-demo.sh
 
 Run the demo:
-docker run -it  --privileged  tc-demo
+./run-demo.sh
