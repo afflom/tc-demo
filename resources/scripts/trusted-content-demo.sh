@@ -29,9 +29,18 @@
 # hide the evidence
 #clear
 
+function prepMessage(){
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "\n"
+  p "Prepping demo environment..."
+  p ""
+}
+
 # Intro
 
 function demoIntro(){
+  clear
   DEMO_PROMPT=""
   PROMPT_TIMEOUT=1
   p "Title: Emporous Trusted Content demo"
@@ -44,8 +53,30 @@ function demoIntro(){
   p "6. Discover the CVE"
   p "7. Publish an updated Emporous Collection"
   p "8. Discover, update, and run the updated content"
+  p "9. Create a software inventory from dependent collections"
   p "Let's get started!\n"
   clear
+}
+
+# Build app schema
+
+function buildAppSchema() {
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "Author and push an application schema:\n"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "cat ../configs/app-schema.yaml"
+  wait
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go build schema ../configs/app-schema.yaml next.registry.io:5001/myorg/application/schema:latest"
+  wait
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go push --plain-http next.registry.io:5001/myorg/application/schema:latest"
+  wait
+
 }
 # Build app v1 Collection
 
@@ -108,6 +139,7 @@ function buildAndPushCVE(){
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
   pei "cat ../configs/cve-dataset-config.yaml"
+  wait
   p "Notice the link from the CVE to our application:\n"
   wait
   DEMO_PROMPT=""
@@ -175,8 +207,12 @@ function buildApp2(){
 
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:1.0.0"
+  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:1.0.0 > inventory.json"
   wait
+  while mapfile -t -n 30 ary && ((${#ary[@]})); do
+      printf '%s\n' "${ary[@]}"
+      sleep 5
+  done < inventory.json
 }
 
 
@@ -191,7 +227,7 @@ function discoverApps(){
   wait
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go create aggregate --schema-id=core-descriptor next.registry.io:5001 ../configs/app-attribute-query.yaml --plain-http=true"
+  pei "uor-client-go create aggregate --schema-id=application next.registry.io:5001 ../configs/app-attribute-query.yaml --plain-http=true"
   wait
 }
 
@@ -206,45 +242,59 @@ function endDemo(){
   p ""
 }
 
-
-
-
-
+prepMessage
 
 export PATH=$PATH:$PWD/demo-bin
 
 # Start the registry
 
- registry serve ./config-dev.yml > registry.log 2>&1 &
+registry serve ./config-dev.yml > /output/registry.log 2>&1 &
 #echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
 # Install containerd and runc
-wget https://github.com/containerd/containerd/releases/download/v1.6.10/containerd-1.6.10-linux-amd64.tar.gz
-tar xvf containerd-1.6.10-linux-amd64.tar.gz
+if ! wget https://github.com/containerd/containerd/releases/download/v1.6.10/containerd-1.6.10-linux-amd64.tar.gz > /output/install.log 2>&1
+then
+  echo "failed to pull containerd"
+  exit 1
+fi
+
+if ! tar xvf containerd-1.6.10-linux-amd64.tar.gz > /output/install.log 2>&1
+then
+  echo "failed to install containerd"
+  exit 1
+fi
+
+if ! dnf -y install runc >> /output/install.log 2>&1
+then
+  echo "failed to install runc"
+  exit 1
+fi
 
 dnf -y install runc
 
 # Start containerd
-./bin/containerd > containerd.log 2>&1 &
+./bin/containerd > /output/containerd.log 2>&1 &
 
-if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest
+if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest >> /output/install.log 2>&1
 then
   echo "failed to build cve schema"
   exit 1
 fi
 
-if ! uor-client-go push --plain-http next.registry.io:5001/myorg/cves/schema:latest
+
+if ! uor-client-go push --plain-http next.registry.io:5001/myorg/cves/schema:latest >> /output/install.log 2>&1
 then
   echo "failed to push cve schema"
   exit 1
 fi
 
 # Intro
-#demoIntro
+demoIntro
 # "1. Build an Emporous Collection from an application"
-#DEMO_PROMPT=""
-#PROMPT_TIMEOUT=3
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
 p "1. Build an Emporous Collection from an updated application\n"
+buildAppSchema
 buildV1
 # "3. Discover applications with Emporous"
 DEMO_PROMPT=""
@@ -269,7 +319,7 @@ checkCVE
 # "7. Publish an updated Emporous Collection"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "7. Build an Emporous Collection from an updated appliation\n"
+p "7. Build an Emporous Collection from an updated application\n"
 buildV2
 # "8. Discover, update, and run the updated content"
 DEMO_PROMPT=""

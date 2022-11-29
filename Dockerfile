@@ -11,6 +11,8 @@ RUN dnf install -y \
 
 COPY . .
 
+COPY vendor vendor
+
 WORKDIR /resources/scripts/
 
 RUN "./build-environment.sh"

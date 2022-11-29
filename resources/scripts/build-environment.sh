@@ -44,7 +44,7 @@ then
     echo "Emporous client repo clone failed"
     exit 1
   fi
-  cd client
+  cd client && cp -r /vendor vendor
 
   if ! make build
   then 
