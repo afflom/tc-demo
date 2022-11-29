@@ -97,7 +97,7 @@ echo "adding fake registry to hosts"
 echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
 echo "starting demo app v1 build"
-## build demo apps
+## build demo app v1
 cd ../content/app/v1
 if ! go build 
 then
@@ -116,3 +116,12 @@ then
 fi
 cd -
 
+echo "starting demo app2 build"
+## build demo app2
+cd ../content/app2/v1
+if ! go build 
+then
+  echo "app2 not built"
+  exit 1
+fi
+cd -

@@ -149,6 +149,32 @@ function buildV2(){
   wait
 }
 
+function buildApp2(){
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "Author dataset-config.yaml:\n"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "cat ../configs/app2-dataset-config.yaml"
+  wait
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=3
+  p "Add metadata to the updated application:\n"
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go build collection -d ../configs/app2-dataset-config.yaml ../content/app2/v1 next.registry.io:5001/myorg/app2:1.0.0 --no-verify=true --plain-http=true"
+  wait
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go push next.registry.io:5001/myorg/app2:1.0.0 --plain-http=true"
+  wait
+
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:v1.0.0"
+  wait
+}
+
 
 ## Discover app update to v2
 function discoverApps(){
@@ -183,7 +209,7 @@ export PATH=$PATH:$PWD/distribution/bin:$PWD/client/bin:$PWD/runc-attributes-wra
 
 
 # TODO: redirect output to /dev/null so that the registry doesnt clutter the demo
- registry serve ./distribution/cmd/registry/config-dev.yml &
+ registry serve ./distribution/cmd/registry/config-dev.yml &> ./registry-log.txt &
 echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
 
@@ -229,14 +255,20 @@ checkCVE
 # "7. Publish an updated Emporous Collection"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "6. Build an Emporous Collection from an updated appliation\n"
+p "7. Build an Emporous Collection from an updated appliation\n"
 buildV2
 # "8. Discover, update, and run the updated content"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "7. Discover, pull, and run updated application:\n"
+p "8. Discover, pull, and run updated application:\n"
 discoverApps
 pullAndRun
+
+# "8. Discover, update, and run the updated content"
+DEMO_PROMPT=""
+PROMPT_TIMEOUT=3
+p "9. Create a dependency relationship and discover that relationship:\n"
+buildApp2
 # End
 endDemo
 
