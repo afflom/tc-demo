@@ -29,6 +29,10 @@ then
   exit 1 
 fi
 
+# Create a bin directory to dump all of the apps
+
+mkdir ./demo-bin
+
 ########################
 # Demo prep: Clone and build Emporous client
 ########################
@@ -47,7 +51,7 @@ then
     echo "Emporous client build failed"
     exit 1
   fi
-  PATH=$PATH:$PWD/bin
+  cp ./bin/uor-client-go ../demo-bin/
   cd -
 fi
 
@@ -65,6 +69,8 @@ then
     echo "CNCF Distribution build failed"
     exit 1
   fi
+  cp ./bin/registry ../demo-bin/
+  cp ./cmd/registry/config-dev.yml ../
   cd -
 fi
 
@@ -86,6 +92,7 @@ then
     echo "RAW not built"
     exit 1
   fi
+  cp ./bin/rcl ../demo-bin/
   cd -
 fi
 

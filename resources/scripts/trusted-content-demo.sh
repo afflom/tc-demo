@@ -175,7 +175,7 @@ function buildApp2(){
 
   DEMO_PROMPT="$ "
   PROMPT_TIMEOUT=2
-  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:v1.0.0"
+  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:1.0.0"
   wait
 }
 
@@ -211,13 +211,13 @@ function endDemo(){
 
 
 
-export PATH=$PATH:$PWD/distribution/bin:$PWD/client/bin:$PWD/runc-attributes-wrapper/bin
+export PATH=$PATH:$PWD/demo-bin
 
 # Start the registry 
 
 
- registry serve ./distribution/cmd/registry/config-dev.yml > registry.log 2>&1 &
-echo '127.0.0.1 next.registry.io' >> /etc/hosts
+ registry serve ./config-dev.yml > registry.log 2>&1 &
+#echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
 # Start containerd
 containerd > containerd.log 2>&1 &
@@ -235,10 +235,10 @@ then
 fi
 
 # Intro
-demoIntro
+#demoIntro
 # "1. Build an Emporous Collection from an application"
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
+#DEMO_PROMPT=""
+#PROMPT_TIMEOUT=3
 p "1. Build an Emporous Collection from an updated application\n"
 buildV1
 # "3. Discover applications with Emporous"
