@@ -21,7 +21,7 @@ This demo shows the following workflow
 
 
 Build the demo:
-./build-demo.sh
+./build-demo.sh Dockerfile my-demo
 
 Run the demo:
-./run-demo.sh
+./run-demo.sh my-demo

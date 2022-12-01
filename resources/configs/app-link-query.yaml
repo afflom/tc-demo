@@ -1,0 +1,9 @@
+apiVersion: client.uor-framework.io/v1alpha1
+kind: AttributeQuery
+links:
+  linksTo:
+    - "sha256:caa51951004e87b9606934ae7939f164395181ba7a7203013519071942540328"
+    - "sha256:6fe2350ee37d388f702519d4b3d3114aa92809a2fb42bbfa1120f34ca8dc1ac3"
+  filterBy:
+    name: mydependentapp
+

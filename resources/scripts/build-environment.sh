@@ -126,7 +126,7 @@ cd -
 echo "starting demo app2 build"
 ## build demo app2
 cd ../content/app2/v1
-if ! go build 
+if ! go build -o heyworld
 then
   echo "app2 not built"
   exit 1
