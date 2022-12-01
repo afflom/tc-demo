@@ -61,7 +61,7 @@ fi
 
 if ! ls distribution &>/dev/null
 then
-  git clone https://github.com/afflom/distribution.git -b add-attribute-endpoint
+  git clone https://github.com/afflom/distribution.git -b refactor/attribute-endpoint
   cd distribution
 
   if ! make binaries
