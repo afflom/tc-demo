@@ -216,6 +216,20 @@ function buildApp2(){
   wait
 }
 
+function inventoryApp2(){
+  DEMO_PROMPT="$ "
+  PROMPT_TIMEOUT=2
+  pei "uor-client-go create inventory --plain-http=true next.registry.io:5001/myorg/app2:1.0.0 > inventory.json"
+  wait
+  DEMO_PROMPT=""
+  PROMPT_TIMEOUT=2
+  p "App2 User: Let's see what is in App2"
+  while mapfile -t -n 30 ary && ((${#ary[@]})); do
+      printf '%s\n' "${ary[@]}"
+      sleep 2
+  done < inventory.json
+}
+
 ## Discover app update to v2
 function discoverApps(){
   DEMO_PROMPT=""
@@ -244,39 +258,12 @@ function endDemo(){
 
 echo '127.0.0.1 next.registry.io' >> /etc/hosts
 
-
-prepMessage
-
 export PATH=$PATH:$PWD/demo-bin
 
 # Start the registry
 
 registry serve ./config-dev.yml > /output/registry.log 2>&1 &
 #echo '127.0.0.1 next.registry.io' >> /etc/hosts
-
-# Install containerd and runc
-if ! wget https://github.com/containerd/containerd/releases/download/v1.6.10/containerd-1.6.10-linux-amd64.tar.gz > /output/install.log 2>&1
-then
-  echo "failed to pull containerd"
-  exit 1
-fi
-
-if ! tar xvf containerd-1.6.10-linux-amd64.tar.gz > /output/install.log 2>&1
-then
-  echo "failed to install containerd"
-  exit 1
-fi
-
-if ! dnf -y install runc >> /output/install.log 2>&1
-then
-  echo "failed to install runc"
-  exit 1
-fi
-
-dnf -y install runc
-
-# Start containerd
-./bin/containerd > /output/containerd.log 2>&1 &
 
 if ! uor-client-go build schema ../configs/cve-schema.yaml next.registry.io:5001/myorg/cves/schema:latest >> /output/install.log 2>&1
 then
@@ -317,39 +304,19 @@ then
   exit 1
 fi
 
-echo '127.0.0.1 next.registry.io' >> /etc/hosts
-
 
 # Intro
-demoIntro
+#demoIntro
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "End User: Discovering available applications with Emporous...\n"
-discoverApps
+p "App2 publisher: I'm going to publish my application with a dependency on myapp v1.0.0\n"
+# "8. Discover, update, and run the updated content"
 DEMO_PROMPT=""
 PROMPT_TIMEOUT=3
-p "\nEnd User: Let's run the latest version of helloworld as a container\n"
-pullAndRun "sha256:caa51951004e87b9606934ae7939f164395181ba7a7203013519071942540328" "1.0.0"
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "\nHelloWorld Publisher: We found a bug in version 1.0.0. Let's publish the new version\n"
-buildV2
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "\nHeyWorld Publisher: The helloworld developers release a new version. Time to upgrade!\n"
 buildApp2
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "\nSecurity Team: We are filing a CVE against helloworld. Here it comes!\n"
-buildAndPushCVE
-checkCVE
-DEMO_PROMPT=""
-PROMPT_TIMEOUT=3
-p "\nEnd User: I wonder what applications in my registry are affected by this CVE.\n"
-findCVE
-findCVELinks
-findAppLinks
 
+p "App2 user: I need to know which software is included in App2\n"
+inventoryApp2
 # End
 endDemo
 

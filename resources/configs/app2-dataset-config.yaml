@@ -3,7 +3,7 @@ apiVersion: client.uor-framework.io/v1alpha1
 collection:
   schemaAddress: next.registry.io:5001/myorg/application/schema:latest
   linkedCollections: 
-    - next.registry.io:5001/myorg/myapp@sha256:6fe2350ee37d388f702519d4b3d3114aa92809a2fb42bbfa1120f34ca8dc1ac3
+    - next.registry.io:5001/myorg/myapp@sha256:464c375fcf97c6e8519701dc8c5cbda3ce6787b76e36cf3c1cd82250de50b0fe
   files:
     - file: "heyworld"
       attributes:
